@@ -106,6 +106,7 @@ async function launchGame(game) {
 }
 
 async function getCatalog() {
+  if (Array.isArray(window.GN_MATH_CATALOG)) return window.GN_MATH_CATALOG;
   let lastError;
   for (const url of CATALOG_URLS) {
     try {
@@ -147,7 +148,7 @@ async function loadGameLibrary() {
         name: entry.name,
         file,
         genre: getGenre(entry.name),
-        coverUrl: GAME_COVER_BASE + encodeURIComponent(coverPath)
+        coverUrl: GAME_COVER_BASE + coverPath.split("/").map(encodeURIComponent).join("/")
       });
     });
 
