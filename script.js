@@ -7,12 +7,15 @@ const gameTitle = document.getElementById("gameTitle");
 const gameFrame = document.getElementById("gameFrame");
 const openGameTab = document.getElementById("openGameTab");
 
-const GAME_DATA_URL = "https://cdn.jsdelivr.net/gh/gn-math/assets@main/zones.json";
+const CATALOG_URLS = [
+  "https://raw.githubusercontent.com/gn-math/assets/main/zones.json",
+  "https://cdn.jsdelivr.net/gh/gn-math/assets@main/zones.json"
+];
 const GAME_HTML_BASE = "https://cdn.jsdelivr.net/gh/gn-math/html@main/";
 const GAME_COVER_BASE = "https://cdn.jsdelivr.net/gh/gn-math/covers@main/";
 
-// Keep non-game entries and clearly unsuitable categories out of the default library.
-const excludedGameName = /suggest games|comments|horror|scary|slender|five nights|freddy|backrooms|creepypasta|bloodmoney|blood money|suicide|epstein|fear & hunger|silent hill|resident evil|doom|wolfenstein|postal|hotline miami|ultrakill|half life|quake|metal gear|grand theft auto|sniper|shooter|shooting|gun|weapon|war\b|battle royale|zombie|nazi|robbery|assassin|killer|murder|combat|boxing|sword|roulette|blackjack|casino|gamble|plinko|dice|slot|adult|hentai|yandere|lobotomy|cruelty squad|people playground|happy wheels|scp:|lethal company|lethal ape|slendytubbies|madness combat|binding of isaac|godzilla|rio rex|bacon may die|stick war|archery|bazooka|cannon|tank|fortzone|pixel gun|ravenfield|time shooter|raft wars|evolving bombs|bomb|swords and sandals|gladi|archers|survivor.io|vampire survivors|plague inc|city defense|telekinesis attack|bowmasters|supreme duelist|ragdoll hit|ragdoll archers|johnny trigger|toss the turtle|attack hole|road of fury|1v1\.lol|solar smash|bank robbery|stickman fight|stickman duel|stickman destruction|stickman and guns|stickman kombat|stickman slasher|stickman hit|smash karts|brawl|clash of vikings|recoil|car survival|office fight|survive to victory|gunspin|weapon craft|weapon upgrade|weapon scale|build a big army|shipo\.io|territorial\.io|evoWars|state\.io|slither\.io|yohoho|agar\.io/i;
+// Exclude catalog entries that are not suitable for a general-audience game list.
+const excludedGameName = /suggest games|comments|horror|scary|slender|five nights|freddy|backrooms|creepypasta|bloodmoney|blood money|fear & hunger|silent hill|resident evil|doom|wolfenstein|postal|hotline miami|ultrakill|half life|quake|metal gear|grand theft auto|sniper|shooter|shooting|gun|weapon|war\b|battle royale|zombie|nazi|robbery|assassin|killer|murder|combat|boxing|sword|roulette|blackjack|casino|gamble|plinko|dice|slot|adult|hentai|yandere|lobotomy|cruelty squad|people playground|happy wheels|scp:|lethal company|lethal ape|slendytubbies|madness combat|binding of isaac|godzilla|rio rex|bacon may die|stick war|archery|bazooka|cannon|tank|fortzone|pixel gun|ravenfield|time shooter|raft wars|evolving bombs|bomb|swords and sandals|gladi|archers|survivor.io|vampire survivors|plague inc|city defense|telekinesis attack|bowmasters|supreme duelist|ragdoll hit|ragdoll archers|johnny trigger|toss the turtle|attack hole|road of fury|1v1\.lol|solar smash|bank robbery|stickman fight|stickman duel|stickman destruction|stickman and guns|stickman kombat|stickman slasher|stickman hit|smash karts|brawl|clash of vikings|recoil|car survival|office fight|survive to victory|gunspin|weapon craft|weapon upgrade|weapon scale|build a big army|shipo\.io|territorial\.io|evoWars|state\.io|slither\.io|yohoho|agar\.io/i;
 
 function getGenre(name) {
   const title = name.toLowerCase();
@@ -26,21 +29,19 @@ function getGenre(name) {
   return "Arcade";
 }
 
-function getGameUrl(game) {
-  return GAME_HTML_BASE + game.file;
-}
-
 function renderGameList(searchText = "") {
   const query = searchText.trim().toLowerCase();
   const filteredGames = gameLibrary.filter(game =>
     game.name.toLowerCase().includes(query) || game.genre.toLowerCase().includes(query)
   );
-
   gameCount.textContent = filteredGames.length + " of " + gameLibrary.length + " games";
-  gameLibraryElement.innerHTML = "";
+  gameLibraryElement.replaceChildren();
 
-  if (filteredGames.length === 0) {
-    gameLibraryElement.innerHTML = '<div class="no-games">No games found. Try another search.</div>';
+  if (!filteredGames.length) {
+    const empty = document.createElement("div");
+    empty.className = "no-games";
+    empty.textContent = "No games found. Try another search.";
+    gameLibraryElement.appendChild(empty);
     return;
   }
 
@@ -49,12 +50,12 @@ function renderGameList(searchText = "") {
     card.className = "library-game";
 
     const cover = document.createElement("img");
-    cover.src = GAME_COVER_BASE + game.id + ".png";
+    cover.src = game.coverUrl;
     cover.alt = game.name + " cover";
     cover.loading = "lazy";
     cover.onerror = () => {
-      cover.removeAttribute("src");
-      cover.alt = "Cover unavailable";
+      cover.onerror = null;
+      cover.src = "https://raw.githubusercontent.com/gn-math/covers/main/" + game.id + ".png";
     };
 
     const info = document.createElement("div");
@@ -76,7 +77,7 @@ function renderGameList(searchText = "") {
 }
 
 function launchGame(game) {
-  const url = getGameUrl(game);
+  const url = GAME_HTML_BASE + encodeURIComponent(game.file);
   gameTitle.textContent = game.name;
   gameFrame.src = url;
   openGameTab.href = url;
@@ -84,15 +85,26 @@ function launchGame(game) {
   gameStage.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+async function getCatalog() {
+  let lastError;
+  for (const url of CATALOG_URLS) {
+    try {
+      const response = await fetch(url, { cache: "no-store" });
+      if (!response.ok) throw new Error("Catalog request failed: " + response.status);
+      const data = await response.json();
+      if (!Array.isArray(data)) throw new Error("Unexpected catalog format");
+      return data;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError || new Error("Could not load the GN-Math catalog");
+}
+
 async function loadGameLibrary() {
-  gameCount.textContent = "Loading the GN-Math catalog...";
-  gameLibraryElement.innerHTML = '<div class="no-games">Loading games...</div>';
-
+  gameCount.textContent = "Loading catalog...";
   try {
-    const response = await fetch(GAME_DATA_URL, { cache: "no-store" });
-    if (!response.ok) throw new Error("Could not load the game catalog.");
-
-    const zones = await response.json();
+    const zones = await getCatalog();
     const seenIds = new Set();
 
     zones.forEach(entry => {
@@ -102,23 +114,33 @@ async function loadGameLibrary() {
       if (excludedGameName.test(entry.name)) return;
       if (seenIds.has(entry.id)) return;
 
-      const file = entry.url.slice("{HTML_URL}/".length);
+      const file = entry.url.substring("{HTML_URL}/".length);
       if (!/^[a-zA-Z0-9._-]+\.html$/.test(file)) return;
+
+      const coverPath = typeof entry.cover === "string" && entry.cover.startsWith("{COVER_URL}/")
+        ? entry.cover.substring("{COVER_URL}/".length)
+        : entry.id + ".png";
 
       seenIds.add(entry.id);
       gameLibrary.push({
         id: entry.id,
         name: entry.name,
         file,
-        genre: getGenre(entry.name)
+        genre: getGenre(entry.name),
+        coverUrl: GAME_COVER_BASE + encodeURIComponent(coverPath)
       });
     });
 
     gameLibrary.sort((a, b) => a.name.localeCompare(b.name));
     renderGameList(gameSearch.value);
+    if (!gameLibrary.length) throw new Error("No compatible games were found in the catalog");
   } catch (error) {
     gameCount.textContent = "Catalog unavailable";
-    gameLibraryElement.innerHTML = '<div class="no-games">The GN-Math catalog could not load. Refresh the page to try again.</div>';
+    gameLibraryElement.replaceChildren();
+    const message = document.createElement("div");
+    message.className = "no-games";
+    message.textContent = "The game list could not load. Check your connection and refresh the page.";
+    gameLibraryElement.appendChild(message);
   }
 }
 
@@ -127,10 +149,6 @@ gameSearch.addEventListener("input", () => renderGameList(gameSearch.value));
 document.getElementById("closeGame").addEventListener("click", () => {
   gameFrame.src = "about:blank";
   gameStage.hidden = true;
-});
-
-document.getElementById("themeButton").addEventListener("click", () => {
-  document.body.classList.toggle("soft-glow");
 });
 
 loadGameLibrary();
