@@ -121,3 +121,14 @@ button,.primary-button,.game-button,.game-action,.icon-button{touch-action:manip
   .game-stage-actions{flex-wrap:wrap;justify-content:flex-end}
 }
 @media(prefers-reduced-motion:reduce){.library-game{transition:none}}
+
+
+/* Keep only the hero banner and the game library on the page. */
+.topbar, .launch-section, .about-section, footer { display: none !important; }
+body { padding-top: 1px; }
+.hero { max-width: 1320px; margin: 0 auto; min-height: 480px; }
+.arcade-section { max-width: 1320px; margin: 0 auto; padding-top: 34px; }
+@media(max-width:800px) {
+  .hero { min-height: auto; }
+  .arcade-section { padding-top: 24px; }
+}
