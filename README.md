@@ -7,15 +7,15 @@ A responsive, space-themed web launchpad with a searchable game library.
 - Responsive layout for desktop, tablet, and mobile
 - Quick links to useful websites
 - Searchable game collection with title and genre filtering
-- Game player that embeds individual game HTML files from the public `gn-math/html` GitHub repository
-- Cover art loaded from the public `gn-math/covers` GitHub repository
-- Optional open-in-new-tab control for each game
+- Loads the current game catalog from the public GN-Math assets repository
+- Individual game pages and cover art load from the public GN-Math GitHub repositories through jsDelivr
+- Embedded game player with an optional open-in-new-tab control
 - Space-inspired styling and glow theme toggle
 - No build tools or dependencies required
 
 ## Run locally
 
-Open `index.html` in a browser, or use a local development server such as VS Code Live Server.
+Open `index.html` in a browser, or use a local development server such as VS Code Live Server. The game catalog is loaded at runtime, so the page needs an internet connection.
 
 ## Deploy with GitHub Pages
 
@@ -26,6 +26,6 @@ Open `index.html` in a browser, or use a local development server such as VS Cod
 
 ## Game sources
 
-The game list is based on game entries in the public GN-Math assets repository. Individual game pages and cover images are requested directly from the corresponding GN-Math GitHub repositories through jsDelivr. NebulaBrowser does not copy the GN-Math website or recreate its main site.
+NebulaBrowser reads the game catalog from `gn-math/assets/zones.json`. It uses each entry's individual HTML filename and game ID to load that game's page and cover image from the public `gn-math/html` and `gn-math/covers` repositories. It does not embed or link to the GN-Math website.
 
-Game titles, game content, and artwork belong to their respective creators. Availability and embedding behavior can vary by game and by browser.
+The default library excludes non-game entries and titles clearly associated with horror, graphic violence, weapons, or gambling. Some catalog entries may also be unavailable or incompatible with the browser. Game titles and artwork remain the property of their respective creators.
