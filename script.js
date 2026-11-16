@@ -76,13 +76,32 @@ function renderGameList(searchText = "") {
   });
 }
 
-function launchGame(game) {
+async function launchGame(game) {
   const url = GAME_HTML_BASE + encodeURIComponent(game.file);
   gameTitle.textContent = game.name;
-  gameFrame.src = url;
-  openGameTab.href = url;
   gameStage.hidden = false;
   gameStage.scrollIntoView({ behavior: "smooth", block: "start" });
+  gameFrame.srcdoc = '<!doctype html><html><body style="background:#090817;color:white;font:16px sans-serif;display:grid;place-items:center;height:100vh;margin:0">Loading game...</body></html>';
+  openGameTab.href = url;
+
+  try {
+    const response = await fetch(url, { cache: "no-store" });
+    if (!response.ok) throw new Error("Game file returned HTTP " + response.status);
+    let html = await response.text();
+    if (!html.trim()) throw new Error("The game file was empty");
+
+    const baseTag = '<base href="' + GAME_HTML_BASE + '">';
+    if (/<head[^>]*>/i.test(html)) {
+      html = html.replace(/<head([^>]*)>/i, match => match + baseTag);
+    } else {
+      html = baseTag + html;
+    }
+    gameFrame.srcdoc = html;
+  } catch (error) {
+    gameFrame.srcdoc = '<!doctype html><html><body style="background:#090817;color:white;font:16px sans-serif;padding:24px"><h2>Could not load this game</h2><p>' +
+      String(error.message || error).replace(/[&<>"]/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[character])) +
+      '</p><p>Try opening the game in a new tab.</p></body></html>';
+  }
 }
 
 async function getCatalog() {
