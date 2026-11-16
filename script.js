@@ -1,4 +1,4 @@
-const gameLibrary = [{"name":"OvO","file":"1-fix2.html","id":1,"genre":"Platform"},{"name":"OvO 2","file":"2-fix3.html","id":2,"genre":"Platform"},{"name":"OvO 3 Dimensions","file":"3-fix3.html","id":3,"genre":"Platform"},{"name":"Ice Dodo","file":"5-fix2.html","id":5,"genre":"Racing"},{"name":"Block Blast","file":"6-fix3.html","id":6,"genre":"Puzzle"},{"name":"Temple Run 2","file":"10-fix2.html","id":10,"genre":"Runner"},{"name":"Stickman Hook","file":"11-fix2.html","id":11,"genre":"Platform"},{"name":"Bridge Race","file":"14-fix2.html","id":14,"genre":"Arcade"},{"name":"Color Water Sort 3D","file":"15-fix2.html","id":15,"genre":"Puzzle"},{"name":"Magic Tiles 3","file":"17-fix2.html","id":17,"genre":"Rhythm"},{"name":"Stacky Dash","file":"18-fix2.html","id":18,"genre":"Puzzle"},{"name":"Pou","file":"23-fix2.html","id":23,"genre":"Casual"},{"name":"Crossy Road","file":"24-fix2.html","id":24,"genre":"Arcade"},{"name":"Amaze","file":"26-fix2.html","id":26,"genre":"Puzzle"},{"name":"Geometry Dash Lite","file":"27-fix2.html","id":27,"genre":"Rhythm"},{"name":"Basketball FRVR","file":"28-fix2.html","id":28,"genre":"Sports"},{"name":"Bottle Jump 3D","file":"30-fix2.html","id":30,"genre":"Skill"},{"name":"Color Match","file":"31-fix2.html","id":31,"genre":"Puzzle"},{"name":"Retro Bowl","file":"33-fix2.html","id":33,"genre":"Sports"},{"name":"Retro Bowl College","file":"34-fix2.html","id":34,"genre":"Sports"},{"name":"Monster Tracks","file":"36-fix3.html","id":36,"genre":"Racing"},{"name":"Gobble","file":"37-fix3.html","id":37,"genre":"Arcade"},{"name":"Vex","file":"45-fix2.html","id":45,"genre":"Platform"},{"name":"Vex 2","file":"46-fix2.html","id":46,"genre":"Platform"},{"name":"Vex 3","file":"47-fix2.html","id":47,"genre":"Platform"},{"name":"Vex 4","file":"49-fix2.html","id":49,"genre":"Platform"},{"name":"Vex 5","file":"50-fix2.html","id":50,"genre":"Platform"},{"name":"Vex 6","file":"51-fix2.html","id":51,"genre":"Platform"},{"name":"Vex 7","file":"52-fix2.html","id":52,"genre":"Platform"},{"name":"Vex 8","file":"53-fix2.html","id":53,"genre":"Platform"},{"name":"A Dance of Fire and Ice","file":"59-fix2.html","id":59,"genre":"Rhythm"},{"name":"Achievement Unlocked","file":"60-fix.html","id":60,"genre":"Platform"},{"name":"Achievement Unlocked 2","file":"61-fix.html","id":61,"genre":"Platform"},{"name":"Achievement Unlocked 3","file":"62-fix.html","id":62,"genre":"Platform"},{"name":"Big Tower Tiny Square","file":"67-fix2.html","id":67,"genre":"Platform"},{"name":"Big NEON Tower Tiny Square","file":"68-fix2.html","id":68,"genre":"Platform"},{"name":"Big ICE Tower Tiny Square","file":"69-fix.html","id":69,"genre":"Platform"},{"name":"Cut the Rope","file":"85-fix2.html","id":85,"genre":"Puzzle"},{"name":"2048","file":"114-fix2.html","id":114,"genre":"Puzzle"},{"name":"Run 3","file":"177-fix.html","id":177,"genre":"Runner"},{"name":"Tetris","file":"733-fix2.html","id":733,"genre":"Puzzle"}];
+const gameLibrary = [];
 const gameLibraryElement = document.getElementById("gameLibrary");
 const gameSearch = document.getElementById("gameSearch");
 const gameCount = document.getElementById("gameCount");
@@ -7,8 +7,27 @@ const gameTitle = document.getElementById("gameTitle");
 const gameFrame = document.getElementById("gameFrame");
 const openGameTab = document.getElementById("openGameTab");
 
+const GAME_DATA_URL = "https://cdn.jsdelivr.net/gh/gn-math/assets@main/zones.json";
+const GAME_HTML_BASE = "https://cdn.jsdelivr.net/gh/gn-math/html@main/";
+const GAME_COVER_BASE = "https://cdn.jsdelivr.net/gh/gn-math/covers@main/";
+
+// Keep non-game entries and clearly unsuitable categories out of the default library.
+const excludedGameName = /suggest games|comments|horror|scary|slender|five nights|freddy|backrooms|creepypasta|bloodmoney|blood money|suicide|epstein|fear & hunger|silent hill|resident evil|doom|wolfenstein|postal|hotline miami|ultrakill|half life|quake|metal gear|grand theft auto|sniper|shooter|shooting|gun|weapon|war\b|battle royale|zombie|nazi|robbery|assassin|killer|murder|combat|boxing|sword|roulette|blackjack|casino|gamble|plinko|dice|slot|adult|hentai|yandere|lobotomy|cruelty squad|people playground|happy wheels|scp:|lethal company|lethal ape|slendytubbies|madness combat|binding of isaac|godzilla|rio rex|bacon may die|stick war|archery|bazooka|cannon|tank|fortzone|pixel gun|ravenfield|time shooter|raft wars|evolving bombs|bomb|swords and sandals|gladi|archers|survivor.io|vampire survivors|plague inc|city defense|telekinesis attack|bowmasters|supreme duelist|ragdoll hit|ragdoll archers|johnny trigger|toss the turtle|attack hole|road of fury|1v1\.lol|solar smash|bank robbery|stickman fight|stickman duel|stickman destruction|stickman and guns|stickman kombat|stickman slasher|stickman hit|smash karts|brawl|clash of vikings|recoil|car survival|office fight|survive to victory|gunspin|weapon craft|weapon upgrade|weapon scale|build a big army|shipo\.io|territorial\.io|evoWars|state\.io|slither\.io|yohoho|agar\.io/i;
+
+function getGenre(name) {
+  const title = name.toLowerCase();
+  if (/puzzle|2048|tetris|wordle|cut the rope|sort|match|bloxorz|minesweeper|suika|peg gle|pegge/.test(title)) return "Puzzle";
+  if (/racing|race|racer|drift|moto|car|bike|track|rider|drive|slowroads|snow rider/.test(title)) return "Racing";
+  if (/basket|football|soccer|fifa|baseball|volley|tennis|golf|bowling|pool|sports/.test(title)) return "Sports";
+  if (/rhythm|dance|friday night funkin|osu|trombone|music|tunes|beat|vib-ribbon/.test(title)) return "Rhythm";
+  if (/run|runner|jump|doodle jump|flappy|platform|vex|obby|climb|parkour|red ball|fancy pants/.test(title)) return "Platform";
+  if (/minecraft|pokemon|sonic|mario|zelda|kirby|pac-man|pacman|metroid|final fantasy|ace attorney|emulator/.test(title)) return "Adventure";
+  if (/idle|clicker|cookie|tycoon|simulator|simulation|farm|shop|business|money|capitalist/.test(title)) return "Simulation";
+  return "Arcade";
+}
+
 function getGameUrl(game) {
-  return "https://cdn.jsdelivr.net/gh/gn-math/html@main/" + game.file;
+  return GAME_HTML_BASE + game.file;
 }
 
 function renderGameList(searchText = "") {
@@ -30,7 +49,7 @@ function renderGameList(searchText = "") {
     card.className = "library-game";
 
     const cover = document.createElement("img");
-    cover.src = "https://cdn.jsdelivr.net/gh/gn-math/covers@main/" + game.id + ".png";
+    cover.src = GAME_COVER_BASE + game.id + ".png";
     cover.alt = game.name + " cover";
     cover.loading = "lazy";
     cover.onerror = () => {
@@ -65,6 +84,44 @@ function launchGame(game) {
   gameStage.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+async function loadGameLibrary() {
+  gameCount.textContent = "Loading the GN-Math catalog...";
+  gameLibraryElement.innerHTML = '<div class="no-games">Loading games...</div>';
+
+  try {
+    const response = await fetch(GAME_DATA_URL, { cache: "no-store" });
+    if (!response.ok) throw new Error("Could not load the game catalog.");
+
+    const zones = await response.json();
+    const seenIds = new Set();
+
+    zones.forEach(entry => {
+      if (!Number.isInteger(entry.id) || entry.id < 0) return;
+      if (typeof entry.name !== "string" || typeof entry.url !== "string") return;
+      if (!entry.url.startsWith("{HTML_URL}/")) return;
+      if (excludedGameName.test(entry.name)) return;
+      if (seenIds.has(entry.id)) return;
+
+      const file = entry.url.slice("{HTML_URL}/".length);
+      if (!/^[a-zA-Z0-9._-]+\.html$/.test(file)) return;
+
+      seenIds.add(entry.id);
+      gameLibrary.push({
+        id: entry.id,
+        name: entry.name,
+        file,
+        genre: getGenre(entry.name)
+      });
+    });
+
+    gameLibrary.sort((a, b) => a.name.localeCompare(b.name));
+    renderGameList(gameSearch.value);
+  } catch (error) {
+    gameCount.textContent = "Catalog unavailable";
+    gameLibraryElement.innerHTML = '<div class="no-games">The GN-Math catalog could not load. Refresh the page to try again.</div>';
+  }
+}
+
 gameSearch.addEventListener("input", () => renderGameList(gameSearch.value));
 
 document.getElementById("closeGame").addEventListener("click", () => {
@@ -76,4 +133,4 @@ document.getElementById("themeButton").addEventListener("click", () => {
   document.body.classList.toggle("soft-glow");
 });
 
-renderGameList();
+loadGameLibrary();
