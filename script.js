@@ -1,210 +1,79 @@
-const destinationInput = document.getElementById("destinationInput");
-const launchButton = document.getElementById("launchButton");
+const gameLibrary = [{"name":"OvO","file":"1-fix2.html","id":1,"genre":"Platform"},{"name":"OvO 2","file":"2-fix3.html","id":2,"genre":"Platform"},{"name":"OvO 3 Dimensions","file":"3-fix3.html","id":3,"genre":"Platform"},{"name":"Ice Dodo","file":"5-fix2.html","id":5,"genre":"Racing"},{"name":"Block Blast","file":"6-fix3.html","id":6,"genre":"Puzzle"},{"name":"Temple Run 2","file":"10-fix2.html","id":10,"genre":"Runner"},{"name":"Stickman Hook","file":"11-fix2.html","id":11,"genre":"Platform"},{"name":"Bridge Race","file":"14-fix2.html","id":14,"genre":"Arcade"},{"name":"Color Water Sort 3D","file":"15-fix2.html","id":15,"genre":"Puzzle"},{"name":"Magic Tiles 3","file":"17-fix2.html","id":17,"genre":"Rhythm"},{"name":"Stacky Dash","file":"18-fix2.html","id":18,"genre":"Puzzle"},{"name":"Pou","file":"23-fix2.html","id":23,"genre":"Casual"},{"name":"Crossy Road","file":"24-fix2.html","id":24,"genre":"Arcade"},{"name":"Amaze","file":"26-fix2.html","id":26,"genre":"Puzzle"},{"name":"Geometry Dash Lite","file":"27-fix2.html","id":27,"genre":"Rhythm"},{"name":"Basketball FRVR","file":"28-fix2.html","id":28,"genre":"Sports"},{"name":"Bottle Jump 3D","file":"30-fix2.html","id":30,"genre":"Skill"},{"name":"Color Match","file":"31-fix2.html","id":31,"genre":"Puzzle"},{"name":"Retro Bowl","file":"33-fix2.html","id":33,"genre":"Sports"},{"name":"Retro Bowl College","file":"34-fix2.html","id":34,"genre":"Sports"},{"name":"Monster Tracks","file":"36-fix3.html","id":36,"genre":"Racing"},{"name":"Gobble","file":"37-fix3.html","id":37,"genre":"Arcade"},{"name":"Vex","file":"45-fix2.html","id":45,"genre":"Platform"},{"name":"Vex 2","file":"46-fix2.html","id":46,"genre":"Platform"},{"name":"Vex 3","file":"47-fix2.html","id":47,"genre":"Platform"},{"name":"Vex 4","file":"49-fix2.html","id":49,"genre":"Platform"},{"name":"Vex 5","file":"50-fix2.html","id":50,"genre":"Platform"},{"name":"Vex 6","file":"51-fix2.html","id":51,"genre":"Platform"},{"name":"Vex 7","file":"52-fix2.html","id":52,"genre":"Platform"},{"name":"Vex 8","file":"53-fix2.html","id":53,"genre":"Platform"},{"name":"A Dance of Fire and Ice","file":"59-fix2.html","id":59,"genre":"Rhythm"},{"name":"Achievement Unlocked","file":"60-fix.html","id":60,"genre":"Platform"},{"name":"Achievement Unlocked 2","file":"61-fix.html","id":61,"genre":"Platform"},{"name":"Achievement Unlocked 3","file":"62-fix.html","id":62,"genre":"Platform"},{"name":"Big Tower Tiny Square","file":"67-fix2.html","id":67,"genre":"Platform"},{"name":"Big NEON Tower Tiny Square","file":"68-fix2.html","id":68,"genre":"Platform"},{"name":"Big ICE Tower Tiny Square","file":"69-fix.html","id":69,"genre":"Platform"},{"name":"Cut the Rope","file":"85-fix2.html","id":85,"genre":"Puzzle"},{"name":"2048","file":"114-fix2.html","id":114,"genre":"Puzzle"},{"name":"Run 3","file":"177-fix.html","id":177,"genre":"Runner"},{"name":"Tetris","file":"733-fix2.html","id":733,"genre":"Puzzle"}];
+const gameLibraryElement = document.getElementById("gameLibrary");
+const gameSearch = document.getElementById("gameSearch");
+const gameCount = document.getElementById("gameCount");
 const gameStage = document.getElementById("gameStage");
 const gameTitle = document.getElementById("gameTitle");
-const gameContent = document.getElementById("gameContent");
+const gameFrame = document.getElementById("gameFrame");
+const openGameTab = document.getElementById("openGameTab");
 
-function launchDestination() {
-  const raw = destinationInput.value.trim();
-  if (!raw) {
-    destinationInput.focus();
+function getGameUrl(game) {
+  return "https://cdn.jsdelivr.net/gh/gn-math/html@main/" + game.file;
+}
+
+function renderGameList(searchText = "") {
+  const query = searchText.trim().toLowerCase();
+  const filteredGames = gameLibrary.filter(game =>
+    game.name.toLowerCase().includes(query) || game.genre.toLowerCase().includes(query)
+  );
+
+  gameCount.textContent = filteredGames.length + " of " + gameLibrary.length + " games";
+  gameLibraryElement.innerHTML = "";
+
+  if (filteredGames.length === 0) {
+    gameLibraryElement.innerHTML = '<div class="no-games">No games found. Try another search.</div>';
     return;
   }
 
-  let destination;
-  if (/^https?:\/\//i.test(raw)) {
-    destination = raw;
-  } else if (/^[\w-]+(\.[\w-]+)+([/?#].*)?$/i.test(raw)) {
-    destination = "https://" + raw;
-  } else {
-    destination = "https://www.google.com/search?q=" + encodeURIComponent(raw);
-  }
+  filteredGames.forEach(game => {
+    const card = document.createElement("article");
+    card.className = "library-game";
 
-  try {
-    const parsed = new URL(destination);
-    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
-      throw new Error("Only web addresses are supported.");
-    }
-    window.open(parsed.href, "_blank", "noopener,noreferrer");
-  } catch {
-    destinationInput.setCustomValidity("Enter a valid website or search phrase.");
-    destinationInput.reportValidity();
-    destinationInput.setCustomValidity("");
-  }
+    const cover = document.createElement("img");
+    cover.src = "https://cdn.jsdelivr.net/gh/gn-math/covers@main/" + game.id + ".png";
+    cover.alt = game.name + " cover";
+    cover.loading = "lazy";
+    cover.onerror = () => {
+      cover.removeAttribute("src");
+      cover.alt = "Cover unavailable";
+    };
+
+    const info = document.createElement("div");
+    info.className = "library-game-info";
+    const title = document.createElement("h3");
+    title.textContent = game.name;
+    const genre = document.createElement("span");
+    genre.textContent = game.genre;
+    info.append(title, genre);
+
+    const play = document.createElement("button");
+    play.type = "button";
+    play.textContent = "Play ↗";
+    play.addEventListener("click", () => launchGame(game));
+
+    card.append(cover, info, play);
+    gameLibraryElement.appendChild(card);
+  });
 }
 
-launchButton.addEventListener("click", launchDestination);
-destinationInput.addEventListener("keydown", event => {
-  if (event.key === "Enter") launchDestination();
+function launchGame(game) {
+  const url = getGameUrl(game);
+  gameTitle.textContent = game.name;
+  gameFrame.src = url;
+  openGameTab.href = url;
+  gameStage.hidden = false;
+  gameStage.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+gameSearch.addEventListener("input", () => renderGameList(gameSearch.value));
+
+document.getElementById("closeGame").addEventListener("click", () => {
+  gameFrame.src = "about:blank";
+  gameStage.hidden = true;
 });
 
 document.getElementById("themeButton").addEventListener("click", () => {
   document.body.classList.toggle("soft-glow");
 });
 
-document.querySelectorAll("[data-game]").forEach(button => {
-  button.addEventListener("click", () => openGame(button.dataset.game));
-});
-
-document.getElementById("closeGame").addEventListener("click", () => {
-  gameStage.hidden = true;
-  gameContent.innerHTML = "";
-});
-
-function openGame(name) {
-  gameStage.hidden = false;
-  gameStage.scrollIntoView({ behavior: "smooth", block: "center" });
-
-  if (name === "memory") startMemory();
-  if (name === "tic") startTicTacToe();
-  if (name === "math") startMath();
-}
-
-function startMemory() {
-  gameTitle.textContent = "Cosmic Pairs";
-  const symbols = ["✦", "☾", "✧", "☼", "◇", "♢", "✺", "☆"];
-  const cards = [...symbols, ...symbols].sort(() => Math.random() - 0.5);
-  let first = null;
-  let locked = false;
-  let matches = 0;
-  let moves = 0;
-
-  gameContent.innerHTML = '<p>Match all eight pairs. Find them in as few moves as you can.</p><p id="memoryScore">Moves: 0 · Matches: 0/8</p><div class="memory-board" id="memoryBoard"></div><button class="game-action" id="memoryRestart">Restart</button>';
-  const board = document.getElementById("memoryBoard");
-  const score = document.getElementById("memoryScore");
-
-  cards.forEach(symbol => {
-    const card = document.createElement("button");
-    card.className = "memory-card";
-    card.type = "button";
-    card.textContent = "?";
-    card.setAttribute("aria-label", "Hidden card");
-    card.addEventListener("click", () => {
-      if (locked || card.classList.contains("matched") || card === first) return;
-      card.textContent = symbol;
-      card.classList.add("flipped");
-      card.setAttribute("aria-label", symbol);
-      if (!first) {
-        first = card;
-        return;
-      }
-      moves++;
-      if (first.textContent === card.textContent) {
-        first.classList.add("matched");
-        card.classList.add("matched");
-        first = null;
-        matches++;
-        score.textContent = "Moves: " + moves + " · Matches: " + matches + "/8";
-        if (matches === 8) score.textContent += " · All pairs found!";
-      } else {
-        locked = true;
-        const previous = first;
-        first = null;
-        score.textContent = "Moves: " + moves + " · Matches: " + matches + "/8";
-        setTimeout(() => {
-          previous.textContent = "?";
-          card.textContent = "?";
-          previous.classList.remove("flipped");
-          card.classList.remove("flipped");
-          previous.setAttribute("aria-label", "Hidden card");
-          card.setAttribute("aria-label", "Hidden card");
-          locked = false;
-        }, 700);
-      }
-    });
-    board.appendChild(card);
-  });
-  document.getElementById("memoryRestart").addEventListener("click", startMemory);
-}
-
-function startTicTacToe() {
-  gameTitle.textContent = "Orbit Tic-Tac-Toe";
-  let cells = Array(9).fill("");
-  let turn = "X";
-  let finished = false;
-  const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-  gameContent.innerHTML = '<p>Take turns placing X and O. Get three in a row to win.</p><p class="game-feedback" id="ticStatus">X goes first.</p><div class="tic-board" id="ticBoard"></div><button class="game-action" id="ticRestart">New round</button>';
-  const board = document.getElementById("ticBoard");
-  const status = document.getElementById("ticStatus");
-
-  function draw() {
-    board.innerHTML = "";
-    cells.forEach((value, index) => {
-      const cell = document.createElement("button");
-      cell.className = "tic-cell";
-      cell.type = "button";
-      cell.textContent = value;
-      cell.setAttribute("aria-label", "Square " + (index + 1) + (value ? ": " + value : ""));
-      cell.addEventListener("click", () => {
-        if (finished || cells[index]) return;
-        cells[index] = turn;
-        const winner = wins.some(line => line.every(position => cells[position] === turn));
-        if (winner) {
-          status.textContent = turn + " wins this round!";
-          finished = true;
-        } else if (cells.every(Boolean)) {
-          status.textContent = "It's a tie!";
-          finished = true;
-        } else {
-          turn = turn === "X" ? "O" : "X";
-          status.textContent = turn + "'s turn.";
-        }
-        draw();
-      });
-      board.appendChild(cell);
-    });
-  }
-  draw();
-  document.getElementById("ticRestart").addEventListener("click", startTicTacToe);
-}
-
-function startMath() {
-  gameTitle.textContent = "Stellar Math";
-  let score = 0;
-  let question = 0;
-  gameContent.innerHTML = '<p>Answer ten quick questions. Choose the correct result.</p><h2 id="mathQuestion"></h2><p id="mathScore">Score: 0 / 10</p><div class="math-answer" id="mathAnswers"></div><p class="game-feedback" id="mathFeedback" aria-live="polite"></p>';
-  nextQuestion();
-
-  function nextQuestion() {
-    if (question >= 10) {
-      document.getElementById("mathQuestion").textContent = "Mission complete!";
-      document.getElementById("mathAnswers").innerHTML = '<button class="game-action" id="mathAgain">Play again</button>';
-      document.getElementById("mathFeedback").textContent = "Final score: " + score + " / 10";
-      document.getElementById("mathAgain").addEventListener("click", startMath);
-      return;
-    }
-    question++;
-    const a = Math.floor(Math.random() * 12) + 1;
-    const b = Math.floor(Math.random() * 12) + 1;
-    const answer = a + b;
-    document.getElementById("mathQuestion").textContent = a + " + " + b + " = ?";
-    document.getElementById("mathScore").textContent = "Question " + question + " / 10 · Score: " + score;
-    document.getElementById("mathFeedback").textContent = "";
-    const choices = new Set([answer]);
-    while (choices.size < 4) choices.add(Math.max(0, answer + Math.floor(Math.random() * 11) - 5));
-    const options = [...choices].sort(() => Math.random() - 0.5);
-    const answers = document.getElementById("mathAnswers");
-    answers.innerHTML = "";
-    options.forEach(option => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.textContent = option;
-      button.addEventListener("click", () => {
-        answers.querySelectorAll("button").forEach(item => item.disabled = true);
-        if (option === answer) {
-          score++;
-          document.getElementById("mathFeedback").textContent = "Correct! Nice work.";
-        } else {
-          document.getElementById("mathFeedback").textContent = "Good try! The answer was " + answer + ".";
-        }
-        document.getElementById("mathScore").textContent = "Question " + question + " / 10 · Score: " + score;
-        const next = document.createElement("button");
-        next.className = "game-action";
-        next.textContent = question === 10 ? "See results" : "Next question";
-        next.addEventListener("click", nextQuestion);
-        answers.appendChild(next);
-      });
-      answers.appendChild(button);
-    });
-  }
-}
+renderGameList();
