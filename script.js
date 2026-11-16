@@ -8,6 +8,7 @@ const gameFrame = document.getElementById("gameFrame");
 const openGameTab = document.getElementById("openGameTab");
 
 const CATALOG_URLS = [
+  "./games.json",
   "https://raw.githubusercontent.com/gn-math/assets/main/zones.json",
   "https://cdn.jsdelivr.net/gh/gn-math/assets@main/zones.json"
 ];
@@ -158,7 +159,7 @@ async function loadGameLibrary() {
     gameLibraryElement.replaceChildren();
     const message = document.createElement("div");
     message.className = "no-games";
-    message.textContent = "The game list could not load. Check your connection and refresh the page.";
+    message.textContent = "The game list could not load: " + (error && error.message ? error.message : "Unknown error") + ". Refresh the page to try again.";
     gameLibraryElement.appendChild(message);
   }
 }
