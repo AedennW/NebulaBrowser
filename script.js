@@ -92,11 +92,15 @@ async function fetchGameDocument(game) {
       if (!response.ok) throw new Error("Game file returned HTTP " + response.status);
       let html = await response.text();
       if (!html.trim()) throw new Error("The game file was empty");
-      const baseTag = '<base href="' + url.substring(0, url.lastIndexOf("/") + 1) + '">';
-      if (/<head[^>]*>/i.test(html)) {
-        html = html.replace(/<head([^>]*)>/i, match => match + baseTag);
-      } else {
-        html = baseTag + html;
+      // Preserve a game's own <base> tag when it has one; some games load
+      // their CSS and JavaScript from a separate project repository.
+      if (!/<base\\b/i.test(html)) {
+        const baseTag = '<base href="' + url.substring(0, url.lastIndexOf("/") + 1) + '">';
+        if (/<head[^>]*>/i.test(html)) {
+          html = html.replace(/<head([^>]*)>/i, match => match + baseTag);
+        } else {
+          html = baseTag + html;
+        }
       }
       return { html, url };
     } catch (error) {
