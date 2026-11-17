@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>Loading game | NebulaBrowser</title>
+  <style>
+    html,body{min-height:100%;margin:0;background:#090817;color:#f6f3ff;font:15px Arial,sans-serif}
+    body{display:grid;place-items:center;padding:24px;box-sizing:border-box}
+    main{width:min(620px,100%);padding:26px;border:1px solid rgba(190,170,255,.2);border-radius:16px;background:#17142f}
+    h1{font-size:20px;margin:0 0 10px}
+    p{color:#aaa5c5;line-height:1.6}
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Loading game...</h1>
+    <p id="loadStatus">Getting the game file from the public GitHub repository.</p>
+  </main>
+  <script>
+    (async function () {
+      const status = document.getElementById("loadStatus");
+      const file = new URLSearchParams(window.location.search).get("file") || "";
+
+      if (!/^[a-zA-Z0-9._-]+\\.html$/.test(file)) {
+        status.textContent = "The game file name is missing or invalid.";
+        return;
+      }
+
+      const sourceUrl = "https://raw.githubusercontent.com/gn-math/html/main/" + file.split("/").map(encodeURIComponent).join("/");
+      try {
+        const response = await fetch(sourceUrl, { cache: "no-store" });
+        if (!response.ok) {
+          throw new Error("GitHub returned HTTP " + response.status + " for the game file.");
+        }
+
+        let gameHtml = await response.text();
+        if (!gameHtml.trim()) {
+          throw new Error("The game file was empty.");
+        }
+
+        // Raw GitHub serves the source file, so write its contents into this
+        // same-origin browsing context to make the browser interpret it as HTML.
+        // Keep each game's own base tag; only add one when it has none.
+        if (!/<base\\s/i.test(gameHtml)) {
+          const baseTag = '<base href="' + sourceUrl.substring(0, sourceUrl.lastIndexOf("/") + 1) + '">';
+          if (/<head[^>]*>/i.test(gameHtml)) {
+            gameHtml = gameHtml.replace(/<head([^>]*)>/i, match => match + baseTag);
+          } else {
+            gameHtml = baseTag + gameHtml;
+          }
+        }
+
+        document.open();
+        document.write(gameHtml);
+        document.close();
+      } catch (error) {
+        document.title = "Game could not load | NebulaBrowser";
+        const heading = document.querySelector("h1");
+        heading.textContent = "Could not load this game";
+        status.textContent = (error && error.message) ? error.message : "The game file could not be downloaded. Try again later.";
+      }
+    })();
+  </script>
+</body>
+</html>
