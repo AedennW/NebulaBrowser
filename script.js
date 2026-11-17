@@ -12,7 +12,10 @@ const CATALOG_URLS = [
   "https://raw.githubusercontent.com/gn-math/assets/main/zones.json",
   "https://cdn.jsdelivr.net/gh/gn-math/assets@main/zones.json"
 ];
-const GAME_HTML_BASE = "https://cdn.jsdelivr.net/gh/gn-math/html@main/";
+const GAME_HTML_BASES = [
+  "https://raw.githubusercontent.com/gn-math/html/main/",
+  "https://cdn.jsdelivr.net/gh/gn-math/html@main/"
+];
 const GAME_COVER_BASE = "https://cdn.jsdelivr.net/gh/gn-math/covers@main/";
 
 // Exclude catalog entries that are not suitable for a general-audience game list.
@@ -78,33 +81,39 @@ function renderGameList(searchText = "") {
 }
 
 async function launchGame(game) {
-  const url = GAME_HTML_BASE + encodeURIComponent(game.file);
+  const urls = GAME_HTML_BASES.map(base => base + game.file.split("/").map(encodeURIComponent).join("/"));
   gameTitle.textContent = game.name;
   gameStage.hidden = false;
   gameStage.scrollIntoView({ behavior: "smooth", block: "start" });
   gameFrame.srcdoc = '<!doctype html><html><body style="background:#090817;color:white;font:16px sans-serif;display:grid;place-items:center;height:100vh;margin:0">Loading game...</body></html>';
-  openGameTab.href = url;
+  openGameTab.href = urls[0];
 
-  try {
-    const response = await fetch(url, { cache: "no-store" });
-    if (!response.ok) throw new Error("Game file returned HTTP " + response.status);
-    let html = await response.text();
-    if (!html.trim()) throw new Error("The game file was empty");
+  let lastError;
+  for (const url of urls) {
+    try {
+      const response = await fetch(url, { cache: "no-store" });
+      if (!response.ok) throw new Error("Game file returned HTTP " + response.status);
+      let html = await response.text();
+      if (!html.trim()) throw new Error("The game file was empty");
 
-    const baseTag = '<base href="' + GAME_HTML_BASE + '">';
-    if (/<head[^>]*>/i.test(html)) {
-      html = html.replace(/<head([^>]*)>/i, match => match + baseTag);
-    } else {
-      html = baseTag + html;
+      const baseTag = '<base href="' + url.substring(0, url.lastIndexOf("/") + 1) + '">';
+      if (/<head[^>]*>/i.test(html)) {
+        html = html.replace(/<head([^>]*)>/i, match => match + baseTag);
+      } else {
+        html = baseTag + html;
+      }
+      gameFrame.srcdoc = html;
+      openGameTab.href = url;
+      return;
+    } catch (error) {
+      lastError = error;
     }
-    gameFrame.srcdoc = html;
-  } catch (error) {
-    gameFrame.srcdoc = '<!doctype html><html><body style="background:#090817;color:white;font:16px sans-serif;padding:24px"><h2>Could not load this game</h2><p>' +
-      String(error.message || error).replace(/[&<>"]/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[character])) +
-      '</p><p>Try opening the game in a new tab.</p></body></html>';
   }
-}
 
+  gameFrame.srcdoc = '<!doctype html><html><body style="background:#090817;color:white;font:16px sans-serif;padding:24px"><h2>Could not load this game</h2><p>' +
+    String(lastError && (lastError.message || lastError) || "Unknown error").replace(/[&<>"]/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[character])) +
+    '</p><p>Both available file sources failed. Try again later.</p></body></html>';
+}
 async function getCatalog() {
   if (Array.isArray(window.GN_MATH_CATALOG)) return window.GN_MATH_CATALOG;
   let lastError;
