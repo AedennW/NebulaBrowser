@@ -6,6 +6,9 @@ const gameStage = document.getElementById("gameStage");
 const gameTitle = document.getElementById("gameTitle");
 const gameFrame = document.getElementById("gameFrame");
 const openGameTab = document.getElementById("openGameTab");
+const fullScreenGame = document.getElementById("fullScreenGame");
+const gameFrameWrap = document.querySelector(".game-frame-wrap");
+let currentGameHtml = "";
 
 const CATALOG_URLS = [
   "./games.json",
@@ -80,14 +83,8 @@ function renderGameList(searchText = "") {
   });
 }
 
-async function launchGame(game) {
+async function fetchGameDocument(game) {
   const urls = GAME_HTML_BASES.map(base => base + game.file.split("/").map(encodeURIComponent).join("/"));
-  gameTitle.textContent = game.name;
-  gameStage.hidden = false;
-  gameStage.scrollIntoView({ behavior: "smooth", block: "start" });
-  gameFrame.srcdoc = '<!doctype html><html><body style="background:#090817;color:white;font:16px sans-serif;display:grid;place-items:center;height:100vh;margin:0">Loading game...</body></html>';
-  openGameTab.href = urls[0];
-
   let lastError;
   for (const url of urls) {
     try {
@@ -95,25 +92,43 @@ async function launchGame(game) {
       if (!response.ok) throw new Error("Game file returned HTTP " + response.status);
       let html = await response.text();
       if (!html.trim()) throw new Error("The game file was empty");
-
       const baseTag = '<base href="' + url.substring(0, url.lastIndexOf("/") + 1) + '">';
       if (/<head[^>]*>/i.test(html)) {
         html = html.replace(/<head([^>]*)>/i, match => match + baseTag);
       } else {
         html = baseTag + html;
       }
-      gameFrame.srcdoc = html;
-      openGameTab.href = url;
-      return;
+      return { html, url };
     } catch (error) {
       lastError = error;
     }
   }
-
-  gameFrame.srcdoc = '<!doctype html><html><body style="background:#090817;color:white;font:16px sans-serif;padding:24px"><h2>Could not load this game</h2><p>' +
-    String(lastError && (lastError.message || lastError) || "Unknown error").replace(/[&<>"]/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[character])) +
-    '</p><p>Both available file sources failed. Try again later.</p></body></html>';
+  throw lastError || new Error("Both game sources failed");
 }
+
+async function launchGame(game) {
+  gameTitle.textContent = game.name;
+  gameStage.hidden = false;
+  gameStage.scrollIntoView({ behavior: "smooth", block: "start" });
+  gameFrame.srcdoc = '<!doctype html><html><body style="background:#090817;color:white;font:16px sans-serif;display:grid;place-items:center;height:100vh;margin:0">Loading game...</body></html>';
+  currentGameHtml = "";
+  openGameTab.disabled = true;
+  openGameTab.textContent = "Preparing game...";
+
+  try {
+    const result = await fetchGameDocument(game);
+    currentGameHtml = result.html;
+    gameFrame.srcdoc = result.html;
+    openGameTab.disabled = false;
+    openGameTab.textContent = "Open in new tab ↗";
+  } catch (error) {
+    openGameTab.disabled = true;
+    openGameTab.textContent = "Game unavailable";
+    const message = String(error && (error.message || error) || "Unknown error").replace(/[&<>"]/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[character]));
+    gameFrame.srcdoc = '<!doctype html><html><body style="background:#090817;color:white;font:16px sans-serif;padding:24px"><h2>Could not load this game</h2><p>' + message + '</p><p>Both available file sources failed. Try again later.</p></body></html>';
+  }
+}
+
 async function getCatalog() {
   if (Array.isArray(window.GN_MATH_CATALOG)) return window.GN_MATH_CATALOG;
   let lastError;
@@ -176,8 +191,39 @@ async function loadGameLibrary() {
 
 gameSearch.addEventListener("input", () => renderGameList(gameSearch.value));
 
-document.getElementById("closeGame").addEventListener("click", () => {
+openGameTab.addEventListener("click", () => {
+  // Open synchronously from the click so the browser permits the new tab.
+  const newTab = window.open("about:blank", "_blank");
+  if (!newTab) {
+    alert("Your browser blocked the new tab. Allow pop-ups for this site and try again.");
+    return;
+  }
+  if (!currentGameHtml) {
+    newTab.document.body.textContent = "The game has not finished loading yet.";
+    return;
+  }
+  const blob = new Blob([currentGameHtml], { type: "text/html;charset=utf-8" });
+  newTab.location.href = URL.createObjectURL(blob);
+});
+
+fullScreenGame.addEventListener("click", async () => {
+  try {
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+    } else if (gameFrameWrap.requestFullscreen) {
+      await gameFrameWrap.requestFullscreen();
+    } else {
+      alert("Fullscreen is not supported by this browser.");
+    }
+  } catch (error) {
+    console.error("Fullscreen request failed:", error);
+  }
+});
+
+document.getElementById("closeGame").addEventListener("click", async () => {
+  if (document.fullscreenElement) await document.exitFullscreen().catch(() => {});
   gameFrame.src = "about:blank";
+  currentGameHtml = "";
   gameStage.hidden = true;
 });
 
