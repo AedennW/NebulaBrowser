@@ -183,8 +183,12 @@ gameSearch.addEventListener("input", () => renderGameList(gameSearch.value));
 openGameTab.addEventListener("click", () => {
   if (!currentGameUrl) return;
   // Open the original hosted HTML page so it keeps its real browser origin and assets.
-  const newTab = window.open(currentGameUrl, "_blank", "noopener,noreferrer");
-  if (!newTab) alert("Your browser blocked the new tab. Allow pop-ups for this site and try again.");
+  const newTab = window.open(currentGameUrl, "_blank");
+  if (!newTab) {
+    alert("Your browser blocked the new tab. Allow pop-ups for this site and try again.");
+    return;
+  }
+  newTab.opener = null;
 });
 
 fullScreenGame.addEventListener("click", async () => {
