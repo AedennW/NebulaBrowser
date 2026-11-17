@@ -7,6 +7,7 @@ const gameTitle = document.getElementById("gameTitle");
 const gameFrame = document.getElementById("gameFrame");
 const openGameTab = document.getElementById("openGameTab");
 const fullScreenGame = document.getElementById("fullScreenGame");
+const focusGameKeyboard = document.getElementById("focusGameKeyboard");
 const gameFrameWrap = document.querySelector(".game-frame-wrap");
 const gameLoadStatus = document.getElementById("gameLoadStatus");
 let currentGameUrl = "";
@@ -15,11 +16,9 @@ let gameLoadSession = 0;
 
 const CATALOG_URLS = [
   "./games.json",
-  "https://raw.githubusercontent.com/gn-math/assets/main/zones.json",
-  "https://cdn.jsdelivr.net/gh/gn-math/assets@main/zones.json"
+  "https://raw.githubusercontent.com/gn-math/assets/main/zones.json"
 ];
-const GAME_HTML_BASE = "https://cdn.jsdelivr.net/gh/gn-math/html@main/";
-const GAME_COVER_BASE = "https://cdn.jsdelivr.net/gh/gn-math/covers@main/";
+const GAME_COVER_BASE = "https://raw.githubusercontent.com/gn-math/covers/main/";
 
 // Exclude catalog entries that are not suitable for a general-audience game list.
 const excludedGameName = /suggest games|comments|horror|scary|slender|five nights|freddy|backrooms|creepypasta|bloodmoney|blood money|fear & hunger|silent hill|resident evil|doom|wolfenstein|postal|hotline miami|ultrakill|half life|quake|metal gear|grand theft auto|sniper|shooter|shooting|gun|weapon|war\b|battle royale|zombie|nazi|robbery|assassin|killer|murder|combat|boxing|sword|roulette|blackjack|casino|gamble|plinko|dice|slot|adult|hentai|yandere|lobotomy|cruelty squad|people playground|happy wheels|scp:|lethal company|lethal ape|slendytubbies|madness combat|binding of isaac|godzilla|rio rex|bacon may die|stick war|archery|bazooka|cannon|tank|fortzone|pixel gun|ravenfield|time shooter|raft wars|evolving bombs|bomb|swords and sandals|gladi|archers|survivor.io|vampire survivors|plague inc|city defense|telekinesis attack|bowmasters|supreme duelist|ragdoll hit|ragdoll archers|johnny trigger|toss the turtle|attack hole|road of fury|1v1\.lol|solar smash|bank robbery|stickman fight|stickman duel|stickman destruction|stickman and guns|stickman kombat|stickman slasher|stickman hit|smash karts|brawl|clash of vikings|recoil|car survival|office fight|survive to victory|gunspin|weapon craft|weapon upgrade|weapon scale|build a big army|shipo\.io|territorial\.io|evoWars|state\.io|slither\.io|yohoho|agar\.io/i;
@@ -84,9 +83,9 @@ function renderGameList(searchText = "") {
 }
 
 function getGameUrl(game) {
-  // Use the hosted HTML page itself, not a fetched srcdoc/blob.
-  // This preserves each game's own <base> URL, origin, cache access and Unity loader context.
-  return GAME_HTML_BASE + game.file.split("/").map(encodeURIComponent).join("/");
+  const url = new URL("./game-loader.html", window.location.href);
+  url.searchParams.set("file", game.file);
+  return url.href;
 }
 
 function launchGame(game) {
@@ -101,11 +100,11 @@ function launchGame(game) {
   currentGameUrl = getGameUrl(game);
   openGameTab.disabled = false;
   openGameTab.textContent = "Open in new tab ↗";
-  gameLoadStatus.textContent = "Opening game...";
+  gameLoadStatus.textContent = "Opening game. Click inside it or use Keyboard controls to activate WASD and arrow keys.";
 
   gameFrame.onload = () => {
     if (session !== gameLoadSession) return;
-    gameLoadStatus.textContent = "Game page opened. Waiting for the game to finish initializing...";
+    gameLoadStatus.textContent = "Game frame opened. Use Keyboard controls if WASD or arrow keys do not respond.";
   };
 
   // Some Unity games download large data and WebAssembly files after the page opens.
@@ -190,6 +189,30 @@ openGameTab.addEventListener("click", () => {
   }
   newTab.opener = null;
 });
+
+function focusGameControls() {
+  try {
+    gameFrame.focus({ preventScroll: true });
+    const gameWindow = gameFrame.contentWindow;
+    if (gameWindow) gameWindow.focus();
+
+    const gameDocument = gameFrame.contentDocument;
+    if (gameDocument) {
+      const target = gameDocument.querySelector("#unity-canvas, canvas, [tabindex]");
+      if (target) {
+        target.focus({ preventScroll: true });
+      } else if (gameDocument.body) {
+        gameDocument.body.tabIndex = -1;
+        gameDocument.body.focus({ preventScroll: true });
+      }
+    }
+    gameLoadStatus.textContent = "Keyboard focus sent to the game. Try WASD or the arrow keys. Some games also require one click on the game area.";
+  } catch (error) {
+    gameLoadStatus.textContent = "Click directly inside the game area to activate its keyboard controls.";
+  }
+}
+
+focusGameKeyboard.addEventListener("click", focusGameControls);
 
 fullScreenGame.addEventListener("click", async () => {
   try {
