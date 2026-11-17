@@ -8,17 +8,17 @@ const gameFrame = document.getElementById("gameFrame");
 const openGameTab = document.getElementById("openGameTab");
 const fullScreenGame = document.getElementById("fullScreenGame");
 const gameFrameWrap = document.querySelector(".game-frame-wrap");
-let currentGameHtml = "";
+const gameLoadStatus = document.getElementById("gameLoadStatus");
+let currentGameUrl = "";
+let gameLoadTimer = null;
+let gameLoadSession = 0;
 
 const CATALOG_URLS = [
   "./games.json",
   "https://raw.githubusercontent.com/gn-math/assets/main/zones.json",
   "https://cdn.jsdelivr.net/gh/gn-math/assets@main/zones.json"
 ];
-const GAME_HTML_BASES = [
-  "https://raw.githubusercontent.com/gn-math/html/main/",
-  "https://cdn.jsdelivr.net/gh/gn-math/html@main/"
-];
+const GAME_HTML_BASE = "https://cdn.jsdelivr.net/gh/gn-math/html@main/";
 const GAME_COVER_BASE = "https://cdn.jsdelivr.net/gh/gn-math/covers@main/";
 
 // Exclude catalog entries that are not suitable for a general-audience game list.
@@ -83,54 +83,39 @@ function renderGameList(searchText = "") {
   });
 }
 
-async function fetchGameDocument(game) {
-  const urls = GAME_HTML_BASES.map(base => base + game.file.split("/").map(encodeURIComponent).join("/"));
-  let lastError;
-  for (const url of urls) {
-    try {
-      const response = await fetch(url, { cache: "no-store" });
-      if (!response.ok) throw new Error("Game file returned HTTP " + response.status);
-      let html = await response.text();
-      if (!html.trim()) throw new Error("The game file was empty");
-      // Preserve a game's own <base> tag when it has one; some games load
-      // their CSS and JavaScript from a separate project repository.
-      if (!/<base\\b/i.test(html)) {
-        const baseTag = '<base href="' + url.substring(0, url.lastIndexOf("/") + 1) + '">';
-        if (/<head[^>]*>/i.test(html)) {
-          html = html.replace(/<head([^>]*)>/i, match => match + baseTag);
-        } else {
-          html = baseTag + html;
-        }
-      }
-      return { html, url };
-    } catch (error) {
-      lastError = error;
-    }
-  }
-  throw lastError || new Error("Both game sources failed");
+function getGameUrl(game) {
+  // Use the hosted HTML page itself, not a fetched srcdoc/blob.
+  // This preserves each game's own <base> URL, origin, cache access and Unity loader context.
+  return GAME_HTML_BASE + game.file.split("/").map(encodeURIComponent).join("/");
 }
 
-async function launchGame(game) {
+function launchGame(game) {
   gameTitle.textContent = game.name;
   gameStage.hidden = false;
   gameStage.scrollIntoView({ behavior: "smooth", block: "start" });
-  gameFrame.srcdoc = '<!doctype html><html><body style="background:#090817;color:white;font:16px sans-serif;display:grid;place-items:center;height:100vh;margin:0">Loading game...</body></html>';
-  currentGameHtml = "";
-  openGameTab.disabled = true;
-  openGameTab.textContent = "Preparing game...";
 
-  try {
-    const result = await fetchGameDocument(game);
-    currentGameHtml = result.html;
-    gameFrame.srcdoc = result.html;
-    openGameTab.disabled = false;
-    openGameTab.textContent = "Open in new tab ↗";
-  } catch (error) {
-    openGameTab.disabled = true;
-    openGameTab.textContent = "Game unavailable";
-    const message = String(error && (error.message || error) || "Unknown error").replace(/[&<>"]/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[character]));
-    gameFrame.srcdoc = '<!doctype html><html><body style="background:#090817;color:white;font:16px sans-serif;padding:24px"><h2>Could not load this game</h2><p>' + message + '</p><p>Both available file sources failed. Try again later.</p></body></html>';
-  }
+  gameLoadSession += 1;
+  const session = gameLoadSession;
+  if (gameLoadTimer) clearTimeout(gameLoadTimer);
+
+  currentGameUrl = getGameUrl(game);
+  openGameTab.disabled = false;
+  openGameTab.textContent = "Open in new tab ↗";
+  gameLoadStatus.textContent = "Opening game...";
+
+  gameFrame.onload = () => {
+    if (session !== gameLoadSession) return;
+    gameLoadStatus.textContent = "Game page opened. Waiting for the game to finish initializing...";
+  };
+
+  // Some Unity games download large data and WebAssembly files after the page opens.
+  // Do not interrupt them; show a useful fallback hint if initialization takes a while.
+  gameLoadTimer = setTimeout(() => {
+    if (session !== gameLoadSession) return;
+    gameLoadStatus.textContent = "Still loading? This game may be downloading large files. You can also test it in a new tab.";
+  }, 45000);
+
+  gameFrame.src = currentGameUrl;
 }
 
 async function getCatalog() {
@@ -196,18 +181,10 @@ async function loadGameLibrary() {
 gameSearch.addEventListener("input", () => renderGameList(gameSearch.value));
 
 openGameTab.addEventListener("click", () => {
-  // Open synchronously from the click so the browser permits the new tab.
-  const newTab = window.open("about:blank", "_blank");
-  if (!newTab) {
-    alert("Your browser blocked the new tab. Allow pop-ups for this site and try again.");
-    return;
-  }
-  if (!currentGameHtml) {
-    newTab.document.body.textContent = "The game has not finished loading yet.";
-    return;
-  }
-  const blob = new Blob([currentGameHtml], { type: "text/html;charset=utf-8" });
-  newTab.location.href = URL.createObjectURL(blob);
+  if (!currentGameUrl) return;
+  // Open the original hosted HTML page so it keeps its real browser origin and assets.
+  const newTab = window.open(currentGameUrl, "_blank", "noopener,noreferrer");
+  if (!newTab) alert("Your browser blocked the new tab. Allow pop-ups for this site and try again.");
 });
 
 fullScreenGame.addEventListener("click", async () => {
@@ -226,8 +203,11 @@ fullScreenGame.addEventListener("click", async () => {
 
 document.getElementById("closeGame").addEventListener("click", async () => {
   if (document.fullscreenElement) await document.exitFullscreen().catch(() => {});
+  if (gameLoadTimer) clearTimeout(gameLoadTimer);
+  gameLoadSession += 1;
+  currentGameUrl = "";
   gameFrame.src = "about:blank";
-  currentGameHtml = "";
+  gameLoadStatus.textContent = "";
   gameStage.hidden = true;
 });
 
