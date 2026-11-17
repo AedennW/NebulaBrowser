@@ -140,3 +140,9 @@ body { padding-top: 1px; }
 .game-frame-wrap:fullscreen{width:100vw;height:100vh;min-height:0;margin:0;border:0;border-radius:0;background:#05040b}
 .game-frame-wrap:fullscreen iframe{width:100%;height:100%}
 @media(max-width:600px){.game-stage-actions .game-action-link{min-height:40px}}
+
+
+/* Game launch status */
+.game-load-status{min-height:18px;margin:10px 2px 0;color:#a99dc5;font-size:11px;line-height:1.5}
+.game-frame-wrap:fullscreen{width:100vw;height:100vh;min-height:0;margin:0;border:0;border-radius:0;background:#05040b}
+.game-frame-wrap:fullscreen iframe{width:100%;height:100%}
