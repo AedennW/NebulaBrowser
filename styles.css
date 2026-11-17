@@ -132,3 +132,11 @@ body { padding-top: 1px; }
   .hero { min-height: auto; }
   .arcade-section { padding-top: 24px; }
 }
+
+
+/* Game viewer controls and fullscreen layout */
+.game-stage-actions .game-action-link{font:inherit;font-size:11px;color:#d9c5ff;border:1px solid var(--line);border-radius:8px;padding:9px 11px;background:rgba(150,112,230,.13);cursor:pointer}
+.game-stage-actions .game-action-link:disabled{opacity:.55;cursor:not-allowed}
+.game-frame-wrap:fullscreen{width:100vw;height:100vh;min-height:0;margin:0;border:0;border-radius:0;background:#05040b}
+.game-frame-wrap:fullscreen iframe{width:100%;height:100%}
+@media(max-width:600px){.game-stage-actions .game-action-link{min-height:40px}}
