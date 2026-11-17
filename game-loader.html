@@ -23,7 +23,7 @@
       const status = document.getElementById("loadStatus");
       const file = new URLSearchParams(window.location.search).get("file") || "";
 
-      if (!/^[a-zA-Z0-9._-]+\\.html$/.test(file)) {
+      if (!/^[a-zA-Z0-9._-]+\.html$/.test(file)) {
         status.textContent = "The game file name is missing or invalid.";
         return;
       }
@@ -43,7 +43,7 @@
         // Raw GitHub serves the source file, so write its contents into this
         // same-origin browsing context to make the browser interpret it as HTML.
         // Keep each game's own base tag; only add one when it has none.
-        if (!/<base\\s/i.test(gameHtml)) {
+        if (!/<base\s/i.test(gameHtml)) {
           const baseTag = '<base href="' + sourceUrl.substring(0, sourceUrl.lastIndexOf("/") + 1) + '">';
           if (/<head[^>]*>/i.test(gameHtml)) {
             gameHtml = gameHtml.replace(/<head([^>]*)>/i, match => match + baseTag);
