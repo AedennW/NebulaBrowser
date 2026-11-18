@@ -1,6 +1,7 @@
 const gameLibrary = [];
 const gameLibraryElement = document.getElementById("gameLibrary");
 const gameSearch = document.getElementById("gameSearch");
+const topGameSearch = document.getElementById("topGameSearch");
 const gameCount = document.getElementById("gameCount");
 const gameStage = document.getElementById("gameStage");
 const gameTitle = document.getElementById("gameTitle");
@@ -198,6 +199,8 @@ fontWeirdness.addEventListener("input", () => updateFontWeirdness(fontWeirdness.
 updateFontWeirdness(fontWeirdness.value);
 
 gameSearch.addEventListener("input", () => renderGameList(gameSearch.value));
+topGameSearch.addEventListener("input", () => { gameSearch.value = topGameSearch.value; renderGameList(topGameSearch.value); });
+gameSearch.addEventListener("input", () => { topGameSearch.value = gameSearch.value; });
 
 openGameTab.addEventListener("click", () => {
   if (!currentGameUrl) return;
