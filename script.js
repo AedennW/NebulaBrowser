@@ -212,13 +212,32 @@ gameSearch.addEventListener("input", () => { topGameSearch.value = gameSearch.va
 
 openGameTab.addEventListener("click", () => {
   if (!currentGameUrl) return;
-  // Open the original hosted HTML page so it keeps its real browser origin and assets.
-  const newTab = window.open(currentGameUrl, "_blank");
+
+  // Open a blank tab first, then load the same game loader inside it.
+  // The address bar stays on about:blank while the nested loader fetches
+  // the game HTML and its assets from the original public game repository.
+  const newTab = window.open("about:blank", "_blank");
   if (!newTab) {
     alert("Your browser blocked the new tab. Allow pop-ups for this site and try again.");
     return;
   }
-  newTab.opener = null;
+
+  try {
+    newTab.document.title = gameTitle.textContent + " | NebulaBrowser";
+    newTab.document.documentElement.style.cssText = "height:100%;margin:0;background:#090817";
+    newTab.document.body.style.cssText = "height:100%;margin:0;overflow:hidden;background:#090817";
+    const frame = newTab.document.createElement("iframe");
+    frame.src = currentGameUrl;
+    frame.title = gameTitle.textContent || "Game";
+    frame.allow = "autoplay; fullscreen; gamepad; accelerometer; gyroscope; orientation-lock";
+    frame.allowFullscreen = true;
+    frame.style.cssText = "display:block;width:100%;height:100%;border:0;background:#090817";
+    newTab.document.body.replaceChildren(frame);
+    newTab.opener = null;
+  } catch (error) {
+    newTab.close();
+    alert("The game could not be opened in a blank tab. Please try again.");
+  }
 });
 
 function focusGameControls() {
