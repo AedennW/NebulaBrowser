@@ -184,16 +184,24 @@ const fontWeirdness = document.getElementById("fontWeirdness");
 const fontWeirdnessValue = document.getElementById("fontWeirdnessValue");
 function updateFontWeirdness(value) {
   const amount = Number(value);
-  const spacing = (amount * 0.025).toFixed(2) + "px";
-  const shadowAlpha = (amount * 0.0016).toFixed(3);
-  const shadow = amount === 0 ? "none" : "0 0 1px rgba(112,76,190," + shadowAlpha + ")";
-  const displayFont = amount < 25 ? '"Plus Jakarta Sans", sans-serif' : amount < 50 ? '"Trebuchet MS", sans-serif' : amount < 75 ? "monospace" : '"Courier New", monospace';
+  const spacing = (amount * 0.018).toFixed(2) + "px";
+  const shadowAlpha = (amount * 0.0012).toFixed(3);
+  const shadow = amount === 0 ? "none" : "0 0 1px rgba(70,55,125," + shadowAlpha + ")";
+  // Keep Latin letters and English words, but progressively use rounded,
+  // Cyrillic-inspired display lettering as the slider increases.
+  const displayFont = amount < 20
+    ? '"Plus Jakarta Sans", sans-serif'
+    : amount < 55
+      ? '"Comfortaa", sans-serif'
+      : '"Russo One", "Comfortaa", sans-serif';
+  const weight = amount < 20 ? "600" : amount < 55 ? "600" : "400";
   document.documentElement.style.setProperty("--type-spacing", spacing);
   document.documentElement.style.setProperty("--type-shadow", shadow);
   document.documentElement.style.setProperty("--type-font", displayFont);
-  document.documentElement.style.setProperty("--type-italic", amount >= 65 ? "italic" : "normal");
+  document.documentElement.style.setProperty("--type-weight", weight);
+  document.documentElement.style.setProperty("--type-italic", "normal");
   fontWeirdnessValue.textContent = amount + "%";
-  fontWeirdness.setAttribute("aria-valuetext", amount + " percent weirdness");
+  fontWeirdness.setAttribute("aria-valuetext", amount + " percent Russian-inspired English lettering");
 }
 fontWeirdness.addEventListener("input", () => updateFontWeirdness(fontWeirdness.value));
 updateFontWeirdness(fontWeirdness.value);
