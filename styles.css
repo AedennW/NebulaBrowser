@@ -167,3 +167,8 @@ footer{color:#9996a6}
 @media(max-width:1000px){.sidebar{width:190px}.main-content{margin-left:190px}.game-library{grid-template-columns:repeat(2,minmax(0,1fr))}.topbar{gap:10px}.breadcrumb{display:none}}
 @media(max-width:760px){.sidebar{width:66px;padding:16px 8px}.main-content{margin-left:66px}.top-search{max-width:none}.topbar{gap:9px}.topbar-help{display:none}.type-control{align-items:flex-start;flex-direction:column}.type-slider-wrap{width:100%}}
 @media(max-width:520px){.sidebar{width:54px;padding:14px 6px}.main-content{margin-left:54px}.topbar{height:56px;padding:0 12px}.top-search{height:35px;font-size:9px}.top-search kbd{display:none}.page-content{padding:16px 12px}.welcome-row{border-radius:12px;padding:22px 17px}.quick-actions{grid-template-columns:1fr}.type-control{padding:14px;margin-bottom:30px}.game-library{grid-template-columns:1fr}}
+
+/* Live text distortion controlled by the workspace slider */
+:root{--type-spacing:0.45px;--type-shadow:0 0 1px rgba(112,76,190,.03);--type-font:"Plus Jakarta Sans",sans-serif;--type-italic:normal}
+body{letter-spacing:var(--type-spacing);text-shadow:var(--type-shadow)}
+.welcome-row h1,.section-heading h2,.type-control-copy h2,.library-game-info h3,.game-stage-head h3{font-family:var(--type-font);font-style:var(--type-italic)}
