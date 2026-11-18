@@ -153,3 +153,17 @@ body { padding-top: 1px; }
 .game-stage-actions #focusGameKeyboard:hover{background:rgba(150,112,230,.28)}
 .game-frame-wrap iframe{outline:none}
 .game-frame-wrap iframe:focus{outline:2px solid rgba(183,155,255,.45);outline-offset:-2px}
+
+
+/* Adjustable typography effect */
+:root{--type-spacing:0.40px;--type-shadow:0 0 1px rgba(218,190,255,.032);--type-font:"Space Grotesk",sans-serif;--type-italic:normal}
+body{letter-spacing:var(--type-spacing);text-shadow:var(--type-shadow)}
+.hero h1,.section h2,.game-stage-head h3,.library-game-info h3{font-family:var(--type-font);font-style:var(--type-italic);letter-spacing:calc(-1.2px + var(--type-spacing))}
+.type-control{max-width:1180px;margin:0 auto;padding:22px 7.5% 42px;display:grid;grid-template-columns:1fr minmax(260px,.8fr);align-items:center;gap:30px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:rgba(20,16,43,.35)}
+.type-control-copy h2{font:600 25px/1.2 "Space Grotesk",sans-serif;letter-spacing:-.7px;margin:9px 0}
+.type-control-copy p{font-size:12px;color:var(--muted);margin:0;line-height:1.6}
+.type-slider-wrap{padding:18px;border:1px solid var(--line);border-radius:13px;background:var(--panel)}
+.type-slider-wrap label{display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--muted);font-size:11px;margin-bottom:13px}
+.type-slider-wrap output{font-weight:700;color:#d8c5ff;font-variant-numeric:tabular-nums}
+.type-slider-wrap input{display:block;width:100%;accent-color:#b28aff;cursor:pointer}
+@media(max-width:700px){.type-control{grid-template-columns:1fr;gap:16px;padding:22px 5% 28px}.type-slider-wrap{padding:15px}}
