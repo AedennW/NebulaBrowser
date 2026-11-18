@@ -3,68 +3,86 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#090817">
-  <meta name="description" content="NebulaBrowser — a space-themed banner and searchable game library.">
-  <title>NebulaBrowser | Games</title>
+  <meta name="theme-color" content="#f7f7fb">
+  <meta name="description" content="NebulaBrowser — a clean, creative dashboard with a searchable game library.">
+  <title>NebulaBrowser | Your creative space</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="stars stars-one" aria-hidden="true"></div>
-  <div class="stars stars-two" aria-hidden="true"></div>
-  <div class="nebula nebula-one" aria-hidden="true"></div>
-  <div class="nebula nebula-two" aria-hidden="true"></div>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#home" aria-label="NebulaBrowser home">
+        <span class="brand-mark">N</span>
+        <span>Nebula<span class="brand-light">Browser</span></span>
+      </a>
+      <button class="create-button" type="button" onclick="document.getElementById('arcade').scrollIntoView({behavior:'smooth'})"><span>＋</span> Explore games</button>
+      <div class="sidebar-label">WORKSPACE</div>
+      <nav class="side-nav" aria-label="Main navigation">
+        <a class="side-link active" href="#home"><span class="side-icon">⌂</span> Home</a>
+        <a class="side-link" href="#arcade"><span class="side-icon">▦</span> Game library</a>
+      </nav>
+      <div class="sidebar-label collections-label">YOUR SPACE</div>
+      <div class="workspace-note"><span class="workspace-dot"></span><span><b>My workspace</b><small>Your games and tools</small></span></div>
+      <div class="sidebar-bottom">
+        <div class="help-card"><span class="help-icon">✦</span><b>Make it yours</b><p>Your personal place to explore, play, and create.</p></div>
+        <div class="profile-row"><span class="profile-avatar">N</span><span><b>NebulaBrowser</b><small>Personal workspace</small></span><span class="profile-menu">•••</span></div>
+      </div>
+    </aside>
 
-  <main id="home">
-    <section class="hero" aria-label="NebulaBrowser banner">
-      <div class="hero-copy">
-        <div class="eyebrow"><span class="pulse-dot"></span> YOUR PERSONAL SPACEPORT</div>
-        <h1>Explore beyond<br><span class="gradient-text">the ordinary.</span></h1>
-        <p class="hero-description">A universe of games, ready when you are.</p>
-      </div>
-      <div class="planet-scene" aria-label="Glowing violet planet illustration">
-        <div class="orbit orbit-a"></div><div class="orbit orbit-b"></div>
-        <div class="planet"><div class="planet-shine"></div><div class="planet-ring"></div></div>
-        <span class="planet-star star-a">✦</span><span class="planet-star star-b">✧</span><span class="planet-star star-c">·</span>
-        <div class="planet-label"><span>NEBULA-01</span><b>DEEP SPACE</b></div>
-      </div>
-    </section>
+    <main class="main-content" id="home">
+      <header class="topbar">
+        <div class="mobile-brand"><span class="brand-mark">N</span><b>NebulaBrowser</b></div>
+        <div class="breadcrumb"><span>Workspace</span><span class="crumb-divider">/</span><b>Home</b></div>
+        <a class="topbar-help" href="#arcade">Explore <span>↗</span></a>
+      </header>
 
-    <section class="type-control" aria-label="Typography effects">
-      <div class="type-control-copy">
-        <span class="eyebrow">CUSTOMIZE YOUR VIEW</span>
-        <h2>Typography <span class="gradient-text">distortion.</span></h2>
-        <p>Slide toward strange lettering or return to the normal font.</p>
-      </div>
-      <div class="type-slider-wrap">
-        <label for="fontWeirdness"><span>Normal</span><output id="fontWeirdnessValue" for="fontWeirdness">18%</output><span>Weird</span></label>
-        <input id="fontWeirdness" type="range" min="0" max="100" value="18" step="1">
-      </div>
-    </section>
+      <div class="page-content">
+        <section class="welcome-row">
+          <div>
+            <div class="welcome-date"><span class="welcome-sparkle">✦</span> YOUR PERSONAL WORKSPACE</div>
+            <h1>What would you like to <span>do today?</span></h1>
+            <p>Pick up a game, discover something new, and enjoy your own space.</p>
+          </div>
+          <div class="welcome-illustration" aria-hidden="true">
+            <div class="shape shape-back"></div><div class="shape shape-mid"></div><div class="shape shape-front">✦</div>
+            <span class="float-dot dot-one"></span><span class="float-dot dot-two"></span><span class="float-cross">✳</span>
+          </div>
+        </section>
 
-    <section class="arcade-section section" id="arcade">
-      <div class="section-heading">
-        <div><div class="eyebrow">GN-MATH GAME LIBRARY</div><h2>Find your <span class="gradient-text">next game.</span></h2></div>
-        <span class="section-index">GAME COLLECTION</span>
+        <section class="quick-actions" aria-label="Quick actions">
+          <a class="quick-action action-purple" href="#arcade"><span class="action-icon">▦</span><span><b>Browse games</b><small>Explore the collection</small></span><span class="action-arrow">↗</span></a>
+          <a class="quick-action action-blue" href="#arcade"><span class="action-icon">⌕</span><span><b>Find a game</b><small>Search by title or genre</small></span><span class="action-arrow">↗</span></a>
+          <a class="quick-action action-peach" href="#arcade"><span class="action-icon">▶</span><span><b>Start playing</b><small>Choose something fun</small></span><span class="action-arrow">↗</span></a>
+        </section>
+
+        <section class="arcade-section" id="arcade">
+          <div class="section-heading">
+            <div><div class="section-kicker">YOUR COLLECTION</div><h2>Game library</h2><p>Find something to play. Search by game title or genre.</p></div>
+            <span class="collection-badge">✦ Curated collection</span>
+          </div>
+          <div class="game-library-tools">
+            <label class="game-search-wrap" for="gameSearch"><span>⌕</span><input id="gameSearch" type="search" placeholder="Search games by name or genre..." autocomplete="off"></label>
+            <span class="game-count" id="gameCount" aria-live="polite">Loading games...</span>
+          </div>
+          <div class="game-library" id="gameLibrary" aria-live="polite"><div class="no-games">Loading the game catalog...</div></div>
+          <p class="game-source-note">Game pages and cover art are loaded from the public GN-Math GitHub repositories. Game names and artwork belong to their respective creators.</p>
+
+          <div class="game-stage" id="gameStage" hidden>
+            <div class="game-stage-head">
+              <div><span class="stage-kicker">NOW PLAYING</span><h3 id="gameTitle">Game</h3></div>
+              <div class="game-stage-actions"><button id="openGameTab" class="game-action-link" type="button">Open in new tab ↗</button><button id="focusGameKeyboard" class="game-action-link" type="button">Keyboard controls ⌨</button><button id="fullScreenGame" class="game-action-link" type="button">Fullscreen ⛶</button><button id="closeGame" class="icon-button" type="button" aria-label="Close game">×</button></div>
+            </div>
+            <div class="game-frame-wrap"><iframe id="gameFrame" title="Selected game" tabindex="0" allow="autoplay; fullscreen; gamepad; accelerometer; gyroscope; orientation-lock" allowfullscreen></iframe></div>
+            <p id="gameLoadStatus" class="game-load-status" role="status" aria-live="polite"></p>
+          </div>
+        </section>
+        <footer><span>© NebulaBrowser</span><span>Made for your workspace <b>✦</b></span></footer>
       </div>
-      <p class="section-description">Search the available games by title or genre, then select Play to launch one.</p>
-      <div class="game-library-tools">
-        <label class="game-search-wrap" for="gameSearch"><span>⌕</span><input id="gameSearch" type="search" placeholder="Search games by name or genre..." autocomplete="off"></label>
-        <span class="game-count" id="gameCount" aria-live="polite">Loading games...</span>
-      </div>
-      <div class="game-library" id="gameLibrary" aria-live="polite"><div class="no-games">Loading the game catalog...</div></div>
-      <p class="game-source-note">Game pages and cover art are loaded from the public GN-Math GitHub repositories. Game names and artwork belong to their respective creators.</p>
-      <div class="game-stage" id="gameStage" hidden>
-        <div class="game-stage-head">
-          <div><span class="eyebrow">GAME RUNNING</span><h3 id="gameTitle">Game</h3></div>
-          <div class="game-stage-actions"><button id="openGameTab" class="game-action-link" type="button">Open in new tab ↗</button><button id="focusGameKeyboard" class="game-action-link" type="button">Keyboard controls ⌨</button><button id="fullScreenGame" class="game-action-link" type="button">Fullscreen ⛶</button><button id="closeGame" class="icon-button" type="button" aria-label="Close game">×</button></div>
-        </div>
-        <div class="game-frame-wrap"><iframe id="gameFrame" title="Selected game" tabindex="0" allow="autoplay; fullscreen; gamepad; accelerometer; gyroscope; orientation-lock" allowfullscreen></iframe></div><p id="gameLoadStatus" class="game-load-status" role="status" aria-live="polite"></p>
-      </div>
-    </section>
-  </main>
+    </main>
+  </div>
   <script src="games.js"></script>
   <script src="script.js"></script>
 </body>
