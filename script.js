@@ -224,8 +224,8 @@ openGameTab.addEventListener("click", () => {
 
   try {
     newTab.document.title = gameTitle.textContent + " | NebulaBrowser";
-    newTab.document.documentElement.style.cssText = "height:100%;margin:0;background:#090817";
-    newTab.document.body.style.cssText = "height:100%;margin:0;overflow:hidden;background:#090817";
+    newTab.document.documentElement.style.cssText = "width:100%;height:100%;min-height:100%;margin:0;overflow:hidden;background:#090817";
+    newTab.document.body.style.cssText = "position:fixed;inset:0;width:100vw;height:100vh;margin:0;padding:0;overflow:hidden;background:#090817";
     const frame = newTab.document.createElement("iframe");
     frame.title = gameTitle.textContent || "Game";
     frame.allow = "autoplay; fullscreen; gamepad; accelerometer; gyroscope; orientation-lock";
@@ -233,8 +233,20 @@ openGameTab.addEventListener("click", () => {
     // Keep the game inside the iframe so game scripts cannot replace the
     // about:blank tab with their own URL.
     frame.setAttribute("sandbox", "allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-popups allow-modals allow-downloads allow-presentation");
-    frame.style.cssText = "display:block;width:100%;height:100%;border:0;background:#090817";
-    newTab.document.body.replaceChildren(frame);
+    frame.style.cssText = "position:absolute;inset:0;display:block;width:100%;height:100%;border:0;background:#090817";
+    const fullscreenButton = newTab.document.createElement("button");
+    fullscreenButton.type = "button";
+    fullscreenButton.textContent = "Enter fullscreen";
+    fullscreenButton.style.cssText = "position:fixed;z-index:2147483647;top:16px;right:16px;padding:11px 16px;border:1px solid rgba(255,255,255,.25);border-radius:10px;background:#211b42;color:white;font:600 14px Arial,sans-serif;cursor:pointer";
+    fullscreenButton.addEventListener("click", async () => {
+      try {
+        await newTab.document.documentElement.requestFullscreen();
+        fullscreenButton.remove();
+      } catch (error) {
+        fullscreenButton.textContent = "Fullscreen unavailable";
+      }
+    });
+    newTab.document.body.replaceChildren(frame, fullscreenButton);
     newTab.opener = null;
     frame.src = currentGameUrl;
   } catch (error) {
