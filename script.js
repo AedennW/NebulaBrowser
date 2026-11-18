@@ -227,13 +227,16 @@ openGameTab.addEventListener("click", () => {
     newTab.document.documentElement.style.cssText = "height:100%;margin:0;background:#090817";
     newTab.document.body.style.cssText = "height:100%;margin:0;overflow:hidden;background:#090817";
     const frame = newTab.document.createElement("iframe");
-    frame.src = currentGameUrl;
     frame.title = gameTitle.textContent || "Game";
     frame.allow = "autoplay; fullscreen; gamepad; accelerometer; gyroscope; orientation-lock";
     frame.allowFullscreen = true;
+    // Keep the game inside the iframe so game scripts cannot replace the
+    // about:blank tab with their own URL.
+    frame.setAttribute("sandbox", "allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-popups allow-modals allow-downloads allow-presentation");
     frame.style.cssText = "display:block;width:100%;height:100%;border:0;background:#090817";
     newTab.document.body.replaceChildren(frame);
     newTab.opener = null;
+    frame.src = currentGameUrl;
   } catch (error) {
     newTab.close();
     alert("The game could not be opened in a blank tab. Please try again.");
