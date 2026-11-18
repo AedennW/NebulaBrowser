@@ -178,6 +178,25 @@ async function loadGameLibrary() {
 }
 
 
+
+const fontWeirdness = document.getElementById("fontWeirdness");
+const fontWeirdnessValue = document.getElementById("fontWeirdnessValue");
+function updateFontWeirdness(value) {
+  const amount = Number(value);
+  const spacing = (amount * 0.025).toFixed(2) + "px";
+  const shadowAlpha = (amount * 0.0016).toFixed(3);
+  const shadow = amount === 0 ? "none" : "0 0 1px rgba(112,76,190," + shadowAlpha + ")";
+  const displayFont = amount < 25 ? '"Plus Jakarta Sans", sans-serif' : amount < 50 ? '"Trebuchet MS", sans-serif' : amount < 75 ? "monospace" : '"Courier New", monospace';
+  document.documentElement.style.setProperty("--type-spacing", spacing);
+  document.documentElement.style.setProperty("--type-shadow", shadow);
+  document.documentElement.style.setProperty("--type-font", displayFont);
+  document.documentElement.style.setProperty("--type-italic", amount >= 65 ? "italic" : "normal");
+  fontWeirdnessValue.textContent = amount + "%";
+  fontWeirdness.setAttribute("aria-valuetext", amount + " percent weirdness");
+}
+fontWeirdness.addEventListener("input", () => updateFontWeirdness(fontWeirdness.value));
+updateFontWeirdness(fontWeirdness.value);
+
 gameSearch.addEventListener("input", () => renderGameList(gameSearch.value));
 
 openGameTab.addEventListener("click", () => {
